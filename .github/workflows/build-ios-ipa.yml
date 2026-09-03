@@ -1,19 +1,44 @@
-name: rk_robot_ios
-description: RK ROBOT iOS controller
-publish_to: "none"
+name: Build RK ROBOT iOS IPA
 
-version: 9.2.6+926
+on:
+  workflow_dispatch:
 
-environment:
-  sdk: ">=3.3.0 <4.0.0"
+jobs:
+  build-ios:
+    runs-on: macos-latest
 
-dependencies:
-  flutter:
-    sdk: flutter
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
 
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
 
-flutter:
-  uses-material-design: true
+      - name: Create iOS platform
+        run: |
+          cp ios/Runner/Info.plist /tmp/RK_ROBOT_Info.plist
+          rm -rf ios
+          flutter create --platforms=ios --org com.rkrobot .
+          cp /tmp/RK_ROBOT_Info.plist ios/Runner/Info.plist
+
+      - name: Get packages
+        run: flutter pub get
+
+      - name: Build unsigned iOS app
+        run: flutter build ios --release --no-codesign
+
+      - name: Make IPA
+        run: |
+          rm -rf Payload
+          mkdir Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -qry RK_ROBOT_V9_2_6_unsigned.ipa Payload
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: RK_ROBOT_V9_2_6_unsigned_IPA
+          path: RK_ROBOT_V9_2_6_unsigned.ipa
