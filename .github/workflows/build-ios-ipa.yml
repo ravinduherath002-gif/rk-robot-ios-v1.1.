@@ -1,0 +1,19 @@
+name: rk_robot_ios
+description: RK ROBOT iOS controller
+publish_to: "none"
+
+version: 9.2.6+926
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
